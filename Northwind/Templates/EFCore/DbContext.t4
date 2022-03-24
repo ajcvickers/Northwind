@@ -1,15 +1,10 @@
-<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.dll" #>
-<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Design.dll" #>
-<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Relational.dll" #>
-<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll" #>
-<#@ assembly name="System.Core" #>
-<#@ import namespace="System" #>
-<#@ import namespace="System.Collections.Generic" #>
-<#@ import namespace="System.Collections" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore.Design" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore.Relational" #>
+<#@ assembly name="Microsoft.Extensions.DependencyInjection.Abstractions" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="Microsoft.EntityFrameworkCore" #>
 <#@ import namespace="Microsoft.EntityFrameworkCore.Design" #>
-<#@ import namespace="Microsoft.EntityFrameworkCore.Infrastructure" #>
 <#@ import namespace="Microsoft.EntityFrameworkCore.Metadata" #>
 <#@ import namespace="Microsoft.EntityFrameworkCore.Scaffolding" #>
 <#@ import namespace="Microsoft.Extensions.DependencyInjection" #>
@@ -18,11 +13,9 @@
 <#@ parameter name="Model" type="Microsoft.EntityFrameworkCore.Metadata.IModel" #>
 <#@ parameter name="Options" type="Microsoft.EntityFrameworkCore.Scaffolding.ModelCodeGenerationOptions" #>
 <#@ import namespace="Microsoft.EntityFrameworkCore.Metadata.Internal" #>
-<#@ import namespace="Microsoft.EntityFrameworkCore.Storage" #>
 <#
     var services = (IServiceProvider)Host;
     var providerCode = services.GetRequiredService<IProviderConfigurationCodeGenerator>();
-    var annotationCode = services.GetRequiredService<IAnnotationCodeGenerator>();
     var code = services.GetRequiredService<ICSharpHelper>();
 #>
 using System;
@@ -65,28 +58,18 @@ public partial class <#= Options.ContextName #> : DbContext
         {
             var key = entityType.FindPrimaryKey();
             var keyPropertyCount = key == null ? 0 : key.Properties.Count;
-            switch (keyPropertyCount)
+            if (keyPropertyCount == 0)
             {
-                case 0:
 #>
             entity.HasNoKey();
 <#
-                    break;
-                case 1:
-                    if (key!.Properties[0].Name != entityType.Name + "Id")
-                    {
+            }
+            else if (keyPropertyCount > 1
+                || key!.Properties[0].Name != entityType.Name + "Id")
+            {
 #>
-            entity.HasKey(e => e.<#= key.Properties[0].Name #>);
+            entity.HasKey(<#= code.Lambda(key.Properties) #>);
 <#
-                    }
-                    break;
-                case 2:
-#>
-            entity.HasKey(e => new { e.<#= key!.Properties[0].Name #>, e.<#= key.Properties[1].Name #> });
-<#
-                    break;
-                default:
-                    throw new NotImplementedException();
             }
         }
 
@@ -132,7 +115,7 @@ public partial class <#= Options.ContextName #> : DbContext
             var defaultValueSql = property.GetDefaultValueSql();
             if (defaultValueSql != null)
             {
-#>.HasDefaultValueSql("<#= defaultValueSql #>")<#
+#>.HasDefaultValueSql(<#= code.Literal(defaultValueSql) #>)<#
             }
 #>;
 <#
@@ -141,7 +124,7 @@ public partial class <#= Options.ContextName #> : DbContext
         foreach (var index in entityType.GetIndexes())
         {
 #>
-            entity.HasIndex(e => e.<#= index.Properties.Single().Name #>);
+            entity.HasIndex(<#= code.Lambda(index.Properties) #>);
 <#
         }
 
@@ -157,7 +140,7 @@ public partial class <#= Options.ContextName #> : DbContext
             {
 #>.WithMany(e => e.<#= foreignKey.PrincipalToDependent!.Name #>)<#
             }
-#>.HasForeignKey(e => e.<#= foreignKey.Properties.Single().Name #>);
+#>.HasForeignKey(<#= code.Lambda(foreignKey.Properties) #>);
 <#
         }
 
@@ -183,7 +166,7 @@ public partial class <#= Options.ContextName #> : DbContext
 <# } #>
     }
 }
-<#
+<#+
     static bool IsManyToManyJoinEntityType(IEntityType entityType)
     {
         if (!entityType.GetNavigations().Any()
