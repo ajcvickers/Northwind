@@ -1,6 +1,6 @@
 # Northwind
 
-`dotnet ef dbcontext scaffold "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Northwind" Microsoft.EntityFrameworkCore.SqlServer --context-dir Data --output-dir Data --force
+`dotnet ef dbcontext scaffold "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Northwind" Microsoft.EntityFrameworkCore.SqlServer --context-dir Data --output-dir Data --force`
 
 `Default` contains Northwind reverse engineered without any templates.
 
