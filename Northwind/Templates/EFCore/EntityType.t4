@@ -1,0 +1,94 @@
+<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.dll" #>
+<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Design.dll" #>
+<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Relational.dll" #>
+<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Design" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Infrastructure" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Metadata" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Scaffolding" #>
+<#@ import namespace="Microsoft.Extensions.DependencyInjection" #>
+<#@ template hostSpecific="true" #>
+<#@ parameter name="NamespaceHint" type="System.String" #>
+<#@ parameter name="EntityType" type="Microsoft.EntityFrameworkCore.Metadata.IEntityType" #>
+<#@ parameter name="Options" type="Microsoft.EntityFrameworkCore.Scaffolding.ModelCodeGenerationOptions" #>
+<#
+    var services = (IServiceProvider)Host;
+    var providerCode = services.GetRequiredService<IProviderConfigurationCodeGenerator>();
+    var annotationCode = services.GetRequiredService<IAnnotationCodeGenerator>();
+    var code = services.GetRequiredService<ICSharpHelper>();
+#>
+using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+
+namespace <#= NamespaceHint #>;
+
+public partial class <#= EntityType.Name #>
+{
+<#
+    foreach (var property in EntityType.GetProperties())
+    {
+        if (property.ClrType.IsValueType)
+        {
+#>
+        public <#= property.ClrType.ShortDisplayName() #> <#= property.Name #> { get; set; }
+<#
+        }
+        else
+        {
+#>
+        public <#=
+    property.ClrType.ShortDisplayName() + (property.IsNullable ? "?" : "") #> <#= property.Name #> { get; set; } <#= property.IsNullable ? "" : " = null!;" #>
+<#
+        }
+    }
+
+    foreach (var navigation in EntityType.GetNavigations())
+    {
+        var fk = navigation.ForeignKey;
+        var targetType = navigation.TargetEntityType;
+        if (navigation.IsOnDependent)
+        {
+            if (fk.IsRequired)
+            {
+#>
+        public <#= targetType.Name #> <#= navigation.Name #> { get; set; } = null!;
+<#
+            }
+            else
+            {
+#>
+        public <#= targetType.Name #>? <#= navigation.Name #> { get; set; }
+<#
+            }
+        }
+        else
+        {
+            if (navigation.IsCollection)
+            {
+#>
+        public ICollection<<#= targetType.Name #>> <#= navigation.Name #> { get; } = new List<<#= targetType.Name #>>();
+<#
+
+            }
+            else
+            {
+#>
+        public <#= targetType.Name #>? <#= navigation.Name #> { get; set; } = null!;
+<#
+            }
+        }
+    }
+
+    foreach (var navigation in EntityType.GetSkipNavigations())
+    {
+        var targetType = navigation.TargetEntityType;
+#>
+        public ICollection<<#= targetType.Name #>> <#= navigation.Name #> { get; } = new List<<#= targetType.Name #>>();
+<#
+    }
+#>
+}

@@ -1,0 +1,212 @@
+<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.dll" #>
+<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Design.dll" #>
+<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Relational.dll" #>
+<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Design" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Infrastructure" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Metadata" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Scaffolding" #>
+<#@ import namespace="Microsoft.Extensions.DependencyInjection" #>
+<#@ template hostSpecific="true" #>
+<#@ parameter name="NamespaceHint" type="System.String" #>
+<#@ parameter name="Model" type="Microsoft.EntityFrameworkCore.Metadata.IModel" #>
+<#@ parameter name="Options" type="Microsoft.EntityFrameworkCore.Scaffolding.ModelCodeGenerationOptions" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Metadata.Internal" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Storage" #>
+<#
+    var services = (IServiceProvider)Host;
+    var providerCode = services.GetRequiredService<IProviderConfigurationCodeGenerator>();
+    var annotationCode = services.GetRequiredService<IAnnotationCodeGenerator>();
+    var code = services.GetRequiredService<ICSharpHelper>();
+#>
+using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+
+namespace <#= NamespaceHint #>;
+
+public partial class <#= Options.ContextName #> : DbContext
+{
+    public <#= Options.ContextName #>()
+    {
+    }
+
+    public <#= Options.ContextName #>(DbContextOptions<<#= Options.ContextName #>> options)
+        : base(options)
+    {
+    }
+
+<#
+    foreach (var entityType in Model.GetEntityTypes().Where(e => !IsManyToManyJoinEntityType(e)))
+    {#>
+    public DbSet<<#= entityType.Name #>> <#= entityType.GetDbSetName() #> => Set<<#= entityType.Name #>>();
+<#
+    }#>
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder<#= code.Fragment(providerCode.GenerateUseProvider(Options.ConnectionString!)) #>;
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+<#
+    foreach (var entityType in Model.GetEntityTypes().Where(e => !IsManyToManyJoinEntityType(e)))
+    {#>
+        modelBuilder.Entity<<#= entityType.Name #>>(entity =>
+        {
+<#
+        if (entityType.BaseType == null)
+        {
+            var key = entityType.FindPrimaryKey();
+            var keyPropertyCount = key == null ? 0 : key.Properties.Count;
+            switch (keyPropertyCount)
+            {
+                case 0:
+#>
+            entity.HasNoKey();
+<#
+                    break;
+                case 1:
+                    if (key!.Properties[0].Name != entityType.Name + "Id")
+                    {
+#>
+            entity.HasKey(e => e.<#= key.Properties[0].Name #>);
+<#
+                    }
+                    break;
+                case 2:
+#>
+            entity.HasKey(e => new { e.<#= key!.Properties[0].Name #>, e.<#= key.Properties[1].Name #> });
+<#
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        var tableName = entityType.GetTableName();
+        if (tableName != null && tableName != entityType.GetDbSetName())
+        {
+#>
+            entity.ToTable("<#= tableName #>");
+<#
+        }
+
+        var viewName = entityType.GetViewName();
+        if (viewName != null)
+        {
+#>
+            entity.ToView("<#= viewName #>");
+<#
+        }
+
+        foreach (var property in entityType.GetDeclaredProperties())
+        {
+#>
+            entity.Property(e => e.<#= property.Name #>)<#
+            var columnName = (string)property[RelationalAnnotationNames.ColumnName];
+            if (columnName != property.Name)
+            {
+#>.HasColumnName("<#= columnName #>")<#
+            }
+            var columnType = (string)property[RelationalAnnotationNames.ColumnType];
+            if (columnType == "datetime" || columnType == "money" || columnType == "image")
+            {
+#>.HasColumnType("<#= columnType #>")<#
+            }
+            var maxLength = property.GetMaxLength();
+            if (maxLength.HasValue)
+            {
+#>.HasMaxLength(<#= maxLength #>)<#
+            }
+            if (property.IsFixedLength() == true)
+            {
+#>.IsFixedLength()<#
+            }
+            var defaultValueSql = property.GetDefaultValueSql();
+            if (defaultValueSql != null)
+            {
+#>.HasDefaultValueSql("<#= defaultValueSql #>")<#
+            }
+#>;
+<#
+        }
+
+        foreach (var index in entityType.GetIndexes())
+        {
+#>
+            entity.HasIndex(e => e.<#= index.Properties.Single().Name #>);
+<#
+        }
+
+        foreach (var foreignKey in entityType.GetForeignKeys())
+        {
+#>
+            entity.HasOne(e => e.<#= foreignKey.DependentToPrincipal!.Name #>)<#
+            if (foreignKey.IsUnique)
+            {
+#>.WithOne(e => e.<#= foreignKey.PrincipalToDependent!.Name #>)<#
+            }
+            else
+            {
+#>.WithMany(e => e.<#= foreignKey.PrincipalToDependent!.Name #>)<#
+            }
+#>.HasForeignKey(e => e.<#= foreignKey.Properties.Single().Name #>);
+<#
+        }
+
+        foreach (var skipNavigation in entityType.GetSkipNavigations().Where(n => n.Name.CompareTo(n.Inverse.Name) > 0))
+        {
+#>
+            entity.HasMany(e => e.<#= skipNavigation.Name #>)
+                .WithMany(e => e.<#= skipNavigation.Inverse.Name #>)
+                .UsingEntity<Dictionary<string, object>>(
+                    "<#= skipNavigation.ForeignKey.DeclaringEntityType.Name #>",
+                        l => l.HasOne<<#= skipNavigation.TargetEntityType.Name #>>().WithMany().HasForeignKey("<#= skipNavigation.Inverse.ForeignKey.Properties.Single().Name #>"),
+                        r => r.HasOne<<#= entityType.Name #>>().WithMany().HasForeignKey("<#= skipNavigation.ForeignKey.Properties.Single().Name #>"),
+                        j =>
+                        {
+                            j.ToTable("<#= skipNavigation.ForeignKey.DeclaringEntityType.GetTableName() #>");
+                        });
+<#
+
+        }
+#>
+        });
+
+<# } #>
+    }
+}
+<#
+    static bool IsManyToManyJoinEntityType(IEntityType entityType)
+    {
+        if (!entityType.GetNavigations().Any()
+            && !entityType.GetSkipNavigations().Any())
+        {
+            var primaryKey = entityType.FindPrimaryKey();
+            var properties = entityType.GetProperties().ToList();
+            var foreignKeys = entityType.GetForeignKeys().ToList();
+            if (primaryKey != null
+                && primaryKey.Properties.Count > 1
+                && foreignKeys.Count == 2
+                && primaryKey.Properties.Count == properties.Count
+                && foreignKeys[0].Properties.Count + foreignKeys[1].Properties.Count == properties.Count
+                && !foreignKeys[0].Properties.Intersect(foreignKeys[1].Properties).Any()
+                && foreignKeys[0].IsRequired
+                && foreignKeys[1].IsRequired
+                && !foreignKeys[0].IsUnique
+                && !foreignKeys[1].IsUnique)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+#>
