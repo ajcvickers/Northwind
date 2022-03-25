@@ -1,14 +1,7 @@
-<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.dll" #>
-<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Design.dll" #>
-<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Relational.dll" #>
-<#@ assembly name="C:\local\code\Northwind\Northwind\bin\Debug\net6.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll" #>
-<#@ assembly name="System.Core" #>
-<#@ import namespace="System" #>
-<#@ import namespace="Microsoft.EntityFrameworkCore" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore.Design" #>
+<#@ assembly name="Microsoft.Extensions.DependencyInjection.Abstractions" #>
 <#@ import namespace="Microsoft.EntityFrameworkCore.Design" #>
-<#@ import namespace="Microsoft.EntityFrameworkCore.Infrastructure" #>
-<#@ import namespace="Microsoft.EntityFrameworkCore.Metadata" #>
-<#@ import namespace="Microsoft.EntityFrameworkCore.Scaffolding" #>
 <#@ import namespace="Microsoft.Extensions.DependencyInjection" #>
 <#@ template hostSpecific="true" #>
 <#@ parameter name="NamespaceHint" type="System.String" #>
@@ -16,8 +9,6 @@
 <#@ parameter name="Options" type="Microsoft.EntityFrameworkCore.Scaffolding.ModelCodeGenerationOptions" #>
 <#
     var services = (IServiceProvider)Host;
-    var providerCode = services.GetRequiredService<IProviderConfigurationCodeGenerator>();
-    var annotationCode = services.GetRequiredService<IAnnotationCodeGenerator>();
     var code = services.GetRequiredService<ICSharpHelper>();
 #>
 using System;
@@ -34,14 +25,14 @@ public partial class <#= EntityType.Name #>
         if (property.ClrType.IsValueType)
         {
 #>
-        public <#= property.ClrType.ShortDisplayName() #> <#= property.Name #> { get; set; }
+        public <#= code.Reference(property.ClrType) #> <#= property.Name #> { get; set; }
 <#
         }
         else
         {
 #>
         public <#=
-    property.ClrType.ShortDisplayName() + (property.IsNullable ? "?" : "") #> <#= property.Name #> { get; set; } <#= property.IsNullable ? "" : " = null!;" #>
+    code.Reference(property.ClrType) + (property.IsNullable ? "?" : "") #> <#= property.Name #> { get; set; } <#= property.IsNullable ? "" : " = null!;" #>
 <#
         }
     }
@@ -77,7 +68,7 @@ public partial class <#= EntityType.Name #>
             else
             {
 #>
-        public <#= targetType.Name #>? <#= navigation.Name #> { get; set; } = null!;
+        public <#= targetType.Name #>? <#= navigation.Name #> { get; set; }
 <#
             }
         }
