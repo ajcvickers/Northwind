@@ -6,8 +6,16 @@ namespace Northwind.Data;
 
 public partial class CustomerAndSuppliersByCity
 {
-        public string? City { get; set; } 
-        public string CompanyName { get; set; }  = null!;
-        public string? ContactName { get; set; } 
-        public string Relationship { get; set; }  = null!;
+    public CustomerAndSuppliersByCity(
+        string companyName, 
+        string relationship)
+    {
+        CompanyName = companyName;
+        Relationship = relationship;
+    }
+
+    public string? City { get; set; }
+    public string CompanyName { get; }
+    public string? ContactName { get; set; }
+    public string Relationship { get; }
 }

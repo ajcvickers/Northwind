@@ -6,9 +6,19 @@ namespace Northwind.Data;
 
 public partial class ProductsByCategory
 {
-        public string CategoryName { get; set; }  = null!;
-        public bool Discontinued { get; set; }
-        public string ProductName { get; set; }  = null!;
-        public string? QuantityPerUnit { get; set; } 
-        public short? UnitsInStock { get; set; }
+    public ProductsByCategory(
+        string categoryName, 
+        bool discontinued, 
+        string productName)
+    {
+        CategoryName = categoryName;
+        Discontinued = discontinued;
+        ProductName = productName;
+    }
+
+    public string CategoryName { get; }
+    public bool Discontinued { get; }
+    public string ProductName { get; }
+    public string? QuantityPerUnit { get; set; }
+    public short? UnitsInStock { get; set; }
 }

@@ -6,9 +6,17 @@ namespace Northwind.Data;
 
 public partial class Category
 {
-        public int CategoryId { get; set; }
-        public string CategoryName { get; set; }  = null!;
-        public string? Description { get; set; } 
-        public byte[]? Picture { get; set; } 
-        public ICollection<Product> Products { get; } = new List<Product>();
+    public Category(
+        int categoryId, 
+        string categoryName)
+    {
+        CategoryId = categoryId;
+        CategoryName = categoryName;
+    }
+
+    public int CategoryId { get; }
+    public string CategoryName { get; }
+    public string? Description { get; set; }
+    public byte[]? Picture { get; set; }
+    public ICollection<Product> Products { get; } = new List<Product>();
 }

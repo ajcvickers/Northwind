@@ -6,6 +6,12 @@ namespace Northwind.Data;
 
 public partial class CategorySalesFor1997
 {
-        public string CategoryName { get; set; }  = null!;
-        public decimal? CategorySales { get; set; }
+    public CategorySalesFor1997(
+        string categoryName)
+    {
+        CategoryName = categoryName;
+    }
+
+    public string CategoryName { get; }
+    public decimal? CategorySales { get; set; }
 }

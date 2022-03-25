@@ -6,6 +6,14 @@ namespace Northwind.Data;
 
 public partial class CurrentProductList
 {
-        public int ProductId { get; set; }
-        public string ProductName { get; set; }  = null!;
+    public CurrentProductList(
+        int productId, 
+        string productName)
+    {
+        ProductId = productId;
+        ProductName = productName;
+    }
+
+    public int ProductId { get; }
+    public string ProductName { get; }
 }

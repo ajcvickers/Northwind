@@ -1,12 +1,16 @@
 <#@ assembly name="Microsoft.EntityFrameworkCore" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore.Design" #>
 <#@ assembly name="Microsoft.Extensions.DependencyInjection.Abstractions" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
 <#@ import namespace="Microsoft.EntityFrameworkCore.Design" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Infrastructure" #>
 <#@ import namespace="Microsoft.Extensions.DependencyInjection" #>
 <#@ template hostSpecific="true" #>
 <#@ parameter name="NamespaceHint" type="System.String" #>
 <#@ parameter name="EntityType" type="Microsoft.EntityFrameworkCore.Metadata.IEntityType" #>
 <#@ parameter name="Options" type="Microsoft.EntityFrameworkCore.Scaffolding.ModelCodeGenerationOptions" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Metadata.Internal" #>
 <#
     var services = (IServiceProvider)Host;
     var code = services.GetRequiredService<ICSharpHelper>();
@@ -19,20 +23,50 @@ namespace <#= NamespaceHint #>;
 
 public partial class <#= EntityType.Name #>
 {
+    public <#= EntityType.Name #>(<#
+
+    var requiredProperties = EntityType.GetProperties()
+        .Where(p => !p.IsNullable)
+        .Select(p => new
+        {
+            p.Name,
+            Type = p.ClrType.ShortDisplayName(),
+            ParameterName = p.Name.Substring(0, 1).ToLower() + p.Name.Substring(1)
+        }).ToList();
+
+    var comma = "";
+    foreach (var property in requiredProperties)
+    {
+#><#= comma #>
+        <#= property.Type #> <#= property.ParameterName #><#
+        comma = ", ";
+    }
+#>)
+    {
+<#
+    foreach (var property in requiredProperties)
+    {
+#>
+        <#= property.Name #> = <#= property.ParameterName #>;
+<#
+    }
+#>
+    }
+
 <#
     foreach (var property in EntityType.GetProperties())
     {
-        if (property.ClrType.IsValueType)
+        if (property.IsNullable)
         {
 #>
-        public <#= code.Reference(property.ClrType) #> <#= property.Name #> { get; set; }
+    public <#=
+    code.Reference(property.ClrType) + (property.ClrType.IsValueType ? "" : "?") #> <#= property.Name #> { get; set; }
 <#
         }
         else
         {
 #>
-        public <#=
-    code.Reference(property.ClrType) + (property.IsNullable ? "?" : "") #> <#= property.Name #> { get; set; } <#= property.IsNullable ? "" : " = null!;" #>
+    public <#= code.Reference(property.ClrType) #> <#= property.Name #> { get; }
 <#
         }
     }
@@ -46,13 +80,13 @@ public partial class <#= EntityType.Name #>
             if (fk.IsRequired)
             {
 #>
-        public <#= targetType.Name #> <#= navigation.Name #> { get; set; } = null!;
+    public <#= targetType.Name #> <#= navigation.Name #> { get; set; } = null!;
 <#
             }
             else
             {
 #>
-        public <#= targetType.Name #>? <#= navigation.Name #> { get; set; }
+    public <#= targetType.Name #>? <#= navigation.Name #> { get; set; }
 <#
             }
         }
@@ -61,14 +95,14 @@ public partial class <#= EntityType.Name #>
             if (navigation.IsCollection)
             {
 #>
-        public ICollection<<#= targetType.Name #>> <#= navigation.Name #> { get; } = new List<<#= targetType.Name #>>();
+    public ICollection<<#= targetType.Name #>> <#= navigation.Name #> { get; } = new List<<#= targetType.Name #>>();
 <#
 
             }
             else
             {
 #>
-        public <#= targetType.Name #>? <#= navigation.Name #> { get; set; }
+    public <#= targetType.Name #>? <#= navigation.Name #> { get; set; }
 <#
             }
         }
@@ -78,7 +112,7 @@ public partial class <#= EntityType.Name #>
     {
         var targetType = navigation.TargetEntityType;
 #>
-        public ICollection<<#= targetType.Name #>> <#= navigation.Name #> { get; } = new List<<#= targetType.Name #>>();
+    public ICollection<<#= targetType.Name #>> <#= navigation.Name #> { get; } = new List<<#= targetType.Name #>>();
 <#
     }
 #>

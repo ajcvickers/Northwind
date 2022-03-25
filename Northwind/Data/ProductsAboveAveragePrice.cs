@@ -6,6 +6,12 @@ namespace Northwind.Data;
 
 public partial class ProductsAboveAveragePrice
 {
-        public string ProductName { get; set; }  = null!;
-        public decimal? UnitPrice { get; set; }
+    public ProductsAboveAveragePrice(
+        string productName)
+    {
+        ProductName = productName;
+    }
+
+    public string ProductName { get; }
+    public decimal? UnitPrice { get; set; }
 }

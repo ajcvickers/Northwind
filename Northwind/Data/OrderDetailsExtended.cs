@@ -6,11 +6,27 @@ namespace Northwind.Data;
 
 public partial class OrderDetailsExtended
 {
-        public float Discount { get; set; }
-        public decimal? ExtendedPrice { get; set; }
-        public int OrderId { get; set; }
-        public int ProductId { get; set; }
-        public string ProductName { get; set; }  = null!;
-        public short Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
+    public OrderDetailsExtended(
+        float discount, 
+        int orderId, 
+        int productId, 
+        string productName, 
+        short quantity, 
+        decimal unitPrice)
+    {
+        Discount = discount;
+        OrderId = orderId;
+        ProductId = productId;
+        ProductName = productName;
+        Quantity = quantity;
+        UnitPrice = unitPrice;
+    }
+
+    public float Discount { get; }
+    public decimal? ExtendedPrice { get; set; }
+    public int OrderId { get; }
+    public int ProductId { get; }
+    public string ProductName { get; }
+    public short Quantity { get; }
+    public decimal UnitPrice { get; }
 }

@@ -6,9 +6,19 @@ namespace Northwind.Data;
 
 public partial class Territory
 {
-        public string TerritoryId { get; set; }  = null!;
-        public int RegionId { get; set; }
-        public string TerritoryDescription { get; set; }  = null!;
-        public Region Region { get; set; } = null!;
-        public ICollection<Employee> Employees { get; } = new List<Employee>();
+    public Territory(
+        string territoryId, 
+        int regionId, 
+        string territoryDescription)
+    {
+        TerritoryId = territoryId;
+        RegionId = regionId;
+        TerritoryDescription = territoryDescription;
+    }
+
+    public string TerritoryId { get; }
+    public int RegionId { get; }
+    public string TerritoryDescription { get; }
+    public Region Region { get; set; } = null!;
+    public ICollection<Employee> Employees { get; } = new List<Employee>();
 }

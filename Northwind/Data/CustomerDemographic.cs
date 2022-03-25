@@ -6,7 +6,13 @@ namespace Northwind.Data;
 
 public partial class CustomerDemographic
 {
-        public string CustomerTypeId { get; set; }  = null!;
-        public string? CustomerDesc { get; set; } 
-        public ICollection<Customer> Customers { get; } = new List<Customer>();
+    public CustomerDemographic(
+        string customerTypeId)
+    {
+        CustomerTypeId = customerTypeId;
+    }
+
+    public string CustomerTypeId { get; }
+    public string? CustomerDesc { get; set; }
+    public ICollection<Customer> Customers { get; } = new List<Customer>();
 }
