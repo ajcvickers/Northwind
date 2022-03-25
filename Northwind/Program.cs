@@ -48,3 +48,26 @@ foreach (var employee in context.Employees
         Console.WriteLine($"      {territory.TerritoryDescription.Trim()} ({territory.Region.RegionDescription.Trim()})");
     }
 }
+
+var marmite = new Product
+{
+    ProductName = "Marmite",
+    Category = context.Categories.Local.Single(e => e.CategoryName == "Condiments"),
+    UnitPrice = 5.99m,
+    Supplier = new Supplier
+    {
+        CompanyName = "Best British Foods",
+        City = "Grimsby"
+    }
+};
+
+context.Add(marmite);
+context.SaveChanges();
+
+marmite.Category = context.Categories.Local.Single(e => e.CategoryName == "Beverages");
+marmite.UnitPrice += 4.00m;
+context.SaveChanges();
+
+context.Remove(marmite.Supplier);
+context.Remove(marmite);
+context.SaveChanges();
