@@ -49,14 +49,12 @@ foreach (var employee in context.Employees
     }
 }
 
-var marmite = new Product
+var marmite = new Product(0, discontinued: false, "Marmite")
 {
-    ProductName = "Marmite",
     Category = context.Categories.Local.Single(e => e.CategoryName == "Condiments"),
     UnitPrice = 5.99m,
-    Supplier = new Supplier
+    Supplier = new Supplier(0, "Best British Foods")
     {
-        CompanyName = "Best British Foods",
         City = "Grimsby"
     }
 };
