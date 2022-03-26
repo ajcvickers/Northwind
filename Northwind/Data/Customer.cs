@@ -6,15 +6,14 @@ namespace Northwind.Data;
 
 public partial class Customer
 {
+    private readonly string _customerId = null!;
+
     public Customer(
-        string customerId, 
         string companyName)
     {
-        CustomerId = customerId;
         CompanyName = companyName;
     }
 
-    public string CustomerId { get; }
     public string? Address { get; set; }
     public string? City { get; set; }
     public string CompanyName { get; }

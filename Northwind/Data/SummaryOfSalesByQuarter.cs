@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class SummaryOfSalesByQuarter
 {
+
     public SummaryOfSalesByQuarter(
         int orderId)
     {

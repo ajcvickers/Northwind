@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class SalesByCategory
 {
+
     public SalesByCategory(
         int categoryId, 
         string categoryName, 

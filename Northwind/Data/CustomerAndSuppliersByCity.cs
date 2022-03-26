@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class CustomerAndSuppliersByCity
 {
+
     public CustomerAndSuppliersByCity(
         string companyName, 
         string relationship)

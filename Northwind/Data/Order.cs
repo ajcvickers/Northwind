@@ -6,13 +6,12 @@ namespace Northwind.Data;
 
 public partial class Order
 {
-    public Order(
-        int orderId)
+    private readonly int _orderId;
+
+    public Order()
     {
-        OrderId = orderId;
     }
 
-    public int OrderId { get; }
     public string? CustomerId { get; set; }
     public int? EmployeeId { get; set; }
     public decimal? Freight { get; set; }

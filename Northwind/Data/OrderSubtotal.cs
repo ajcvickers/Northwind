@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class OrderSubtotal
 {
+
     public OrderSubtotal(
         int orderId)
     {

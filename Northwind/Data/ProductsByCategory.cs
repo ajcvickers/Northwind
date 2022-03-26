@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class ProductsByCategory
 {
+
     public ProductsByCategory(
         string categoryName, 
         bool discontinued, 

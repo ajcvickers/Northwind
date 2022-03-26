@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class SalesTotalsByAmount
 {
+
     public SalesTotalsByAmount(
         string companyName, 
         int orderId)

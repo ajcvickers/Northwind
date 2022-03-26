@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class CurrentProductList
 {
+
     public CurrentProductList(
         int productId, 
         string productName)

@@ -6,17 +6,16 @@ namespace Northwind.Data;
 
 public partial class Employee
 {
+    private readonly int _employeeId;
+
     public Employee(
-        int employeeId, 
         string firstName, 
         string lastName)
     {
-        EmployeeId = employeeId;
         FirstName = firstName;
         LastName = lastName;
     }
 
-    public int EmployeeId { get; }
     public string? Address { get; set; }
     public DateTime? BirthDate { get; set; }
     public string? City { get; set; }

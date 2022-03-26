@@ -6,15 +6,14 @@ namespace Northwind.Data;
 
 public partial class Category
 {
+    private readonly int _categoryId;
+
     public Category(
-        int categoryId, 
         string categoryName)
     {
-        CategoryId = categoryId;
         CategoryName = categoryName;
     }
 
-    public int CategoryId { get; }
     public string CategoryName { get; }
     public string? Description { get; set; }
     public byte[]? Picture { get; set; }

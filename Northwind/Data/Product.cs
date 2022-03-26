@@ -6,17 +6,16 @@ namespace Northwind.Data;
 
 public partial class Product
 {
+    private readonly int _productId;
+
     public Product(
-        int productId, 
         bool discontinued, 
         string productName)
     {
-        ProductId = productId;
         Discontinued = discontinued;
         ProductName = productName;
     }
 
-    public int ProductId { get; }
     public int? CategoryId { get; set; }
     public bool Discontinued { get; }
     public string ProductName { get; }

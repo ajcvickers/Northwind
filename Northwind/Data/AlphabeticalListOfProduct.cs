@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class AlphabeticalListOfProduct
 {
+
     public AlphabeticalListOfProduct(
         string categoryName, 
         bool discontinued, 

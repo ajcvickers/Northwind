@@ -4,6 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <NoWarn>0169, 0414</NoWarn> 
     </PropertyGroup>
 
     <ItemGroup>

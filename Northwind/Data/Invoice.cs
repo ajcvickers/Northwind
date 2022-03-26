@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class Invoice
 {
+
     public Invoice(
         string customerName, 
         float discount, 

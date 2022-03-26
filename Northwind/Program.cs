@@ -11,10 +11,10 @@ Console.WriteLine("Products:");
 foreach (var category in context.Categories
              .Include(e => e.Products).ThenInclude(e => e.Supplier))
 {
-    Console.WriteLine($"  {category.CategoryId}: {category.CategoryName}");
+    Console.WriteLine($"  {category.CategoryName}");
     foreach (var product in category.Products)
     {
-        Console.WriteLine($"    {product.ProductId}: {product.ProductName} (supplied by {product.Supplier!.CompanyName})");
+        Console.WriteLine($"    {product.ProductName} (supplied by {product.Supplier!.CompanyName})");
     }
 }
 
@@ -24,7 +24,7 @@ foreach (var customer in context.Customers
              .Include(e => e.Orders).ThenInclude(e => e.OrderDetails).ThenInclude(e => e.Product)
              .Include(e => e.Orders).ThenInclude(e => e.ShipViaNavigation))
 {
-    Console.WriteLine($"  {customer.CustomerId}: {customer.CompanyName}");
+    Console.WriteLine($"  {customer.CompanyName}");
     foreach (var order in customer.Orders)
     {
         Console.WriteLine($"    Order: {order.OrderDate} (shipped by {order.ShipViaNavigation!.CompanyName})");
@@ -49,11 +49,11 @@ foreach (var employee in context.Employees
     }
 }
 
-var marmite = new Product(0, discontinued: false, "Marmite")
+var marmite = new Product(discontinued: false, "Marmite")
 {
     Category = context.Categories.Local.Single(e => e.CategoryName == "Condiments"),
     UnitPrice = 5.99m,
-    Supplier = new Supplier(0, "Best British Foods")
+    Supplier = new Supplier("Best British Foods")
     {
         City = "Grimsby"
     }

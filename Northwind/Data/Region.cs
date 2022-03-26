@@ -6,15 +6,14 @@ namespace Northwind.Data;
 
 public partial class Region
 {
+    private readonly int _regionId;
+
     public Region(
-        int regionId, 
         string regionDescription)
     {
-        RegionId = regionId;
         RegionDescription = regionDescription;
     }
 
-    public int RegionId { get; }
     public string RegionDescription { get; }
     public ICollection<Territory> Territories { get; } = new List<Territory>();
 }

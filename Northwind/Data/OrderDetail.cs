@@ -6,22 +6,19 @@ namespace Northwind.Data;
 
 public partial class OrderDetail
 {
+    private readonly int _orderId;
+    private readonly int _productId;
+
     public OrderDetail(
-        int orderId, 
-        int productId, 
         float discount, 
         short quantity, 
         decimal unitPrice)
     {
-        OrderId = orderId;
-        ProductId = productId;
         Discount = discount;
         Quantity = quantity;
         UnitPrice = unitPrice;
     }
 
-    public int OrderId { get; }
-    public int ProductId { get; }
     public float Discount { get; }
     public short Quantity { get; }
     public decimal UnitPrice { get; }

@@ -6,15 +6,14 @@ namespace Northwind.Data;
 
 public partial class Supplier
 {
+    private readonly int _supplierId;
+
     public Supplier(
-        int supplierId, 
         string companyName)
     {
-        SupplierId = supplierId;
         CompanyName = companyName;
     }
 
-    public int SupplierId { get; }
     public string? Address { get; set; }
     public string? City { get; set; }
     public string CompanyName { get; }

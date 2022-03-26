@@ -68,11 +68,12 @@ public partial class NorthwindContext : DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
+            entity.HasKey("_categoryId");
+            entity.Property<int>("_categoryId").HasColumnName("CategoryID");
             entity.Property(e => e.CategoryName).HasMaxLength(15);
             entity.Property(e => e.Description);
             entity.Property(e => e.Picture).HasColumnType("image");
-            entity.HasIndex(x => x.CategoryName);
+            entity.HasIndex("CategoryName");
         });
 
         modelBuilder.Entity<CategorySalesFor1997>(entity =>
@@ -93,7 +94,8 @@ public partial class NorthwindContext : DbContext
 
         modelBuilder.Entity<Customer>(entity =>
         {
-            entity.Property(e => e.CustomerId).HasColumnName("CustomerID").HasMaxLength(5).IsFixedLength();
+            entity.HasKey("_customerId");
+            entity.Property<string>("_customerId").HasColumnName("CustomerID").HasMaxLength(5).IsFixedLength();
             entity.Property(e => e.Address).HasMaxLength(60);
             entity.Property(e => e.City).HasMaxLength(15);
             entity.Property(e => e.CompanyName).HasMaxLength(40);
@@ -104,10 +106,10 @@ public partial class NorthwindContext : DbContext
             entity.Property(e => e.Phone).HasMaxLength(24);
             entity.Property(e => e.PostalCode).HasMaxLength(10);
             entity.Property(e => e.Region).HasMaxLength(15);
-            entity.HasIndex(x => x.City);
-            entity.HasIndex(x => x.CompanyName);
-            entity.HasIndex(x => x.PostalCode);
-            entity.HasIndex(x => x.Region);
+            entity.HasIndex("City");
+            entity.HasIndex("CompanyName");
+            entity.HasIndex("PostalCode");
+            entity.HasIndex("Region");
             entity.HasMany(e => e.CustomerTypes)
                 .WithMany(e => e.Customers)
                 .UsingEntity<Dictionary<string, object>>(
@@ -132,14 +134,15 @@ public partial class NorthwindContext : DbContext
 
         modelBuilder.Entity<CustomerDemographic>(entity =>
         {
-            entity.HasKey(x => x.CustomerTypeId);
-            entity.Property(e => e.CustomerTypeId).HasColumnName("CustomerTypeID").HasMaxLength(10).IsFixedLength();
+            entity.HasKey("_customerTypeId");
+            entity.Property<string>("_customerTypeId").HasColumnName("CustomerTypeID").HasMaxLength(10).IsFixedLength();
             entity.Property(e => e.CustomerDesc);
         });
 
         modelBuilder.Entity<Employee>(entity =>
         {
-            entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
+            entity.HasKey("_employeeId");
+            entity.Property<int>("_employeeId").HasColumnName("EmployeeID");
             entity.Property(e => e.Address).HasMaxLength(60);
             entity.Property(e => e.BirthDate).HasColumnType("datetime");
             entity.Property(e => e.City).HasMaxLength(15);
@@ -157,9 +160,9 @@ public partial class NorthwindContext : DbContext
             entity.Property(e => e.ReportsTo);
             entity.Property(e => e.Title).HasMaxLength(30);
             entity.Property(e => e.TitleOfCourtesy).HasMaxLength(25);
-            entity.HasIndex(x => x.LastName);
-            entity.HasIndex(x => x.PostalCode);
-            entity.HasOne(e => e.ReportsToNavigation).WithMany(e => e.InverseReportsToNavigation).HasForeignKey(x => x.ReportsTo);
+            entity.HasIndex("LastName");
+            entity.HasIndex("PostalCode");
+            entity.HasOne(e => e.ReportsToNavigation).WithMany(e => e.InverseReportsToNavigation).HasForeignKey("ReportsTo");
             entity.HasMany(e => e.Territories)
                 .WithMany(e => e.Employees)
                 .UsingEntity<Dictionary<string, object>>(
@@ -206,7 +209,8 @@ public partial class NorthwindContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.Property(e => e.OrderId).HasColumnName("OrderID");
+            entity.HasKey("_orderId");
+            entity.Property<int>("_orderId").HasColumnName("OrderID");
             entity.Property(e => e.CustomerId).HasColumnName("CustomerID").HasMaxLength(5).IsFixedLength();
             entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
             entity.Property(e => e.Freight).HasColumnType("money").HasDefaultValueSql("((0))");
@@ -220,34 +224,34 @@ public partial class NorthwindContext : DbContext
             entity.Property(e => e.ShipRegion).HasMaxLength(15);
             entity.Property(e => e.ShipVia);
             entity.Property(e => e.ShippedDate).HasColumnType("datetime");
-            entity.HasIndex(x => x.CustomerId);
-            entity.HasIndex(x => x.CustomerId);
-            entity.HasIndex(x => x.EmployeeId);
-            entity.HasIndex(x => x.EmployeeId);
-            entity.HasIndex(x => x.OrderDate);
-            entity.HasIndex(x => x.ShipPostalCode);
-            entity.HasIndex(x => x.ShippedDate);
-            entity.HasIndex(x => x.ShipVia);
-            entity.HasOne(e => e.Customer).WithMany(e => e.Orders).HasForeignKey(x => x.CustomerId);
-            entity.HasOne(e => e.Employee).WithMany(e => e.Orders).HasForeignKey(x => x.EmployeeId);
-            entity.HasOne(e => e.ShipViaNavigation).WithMany(e => e.Orders).HasForeignKey(x => x.ShipVia);
+            entity.HasIndex("CustomerId");
+            entity.HasIndex("CustomerId");
+            entity.HasIndex("EmployeeId");
+            entity.HasIndex("EmployeeId");
+            entity.HasIndex("OrderDate");
+            entity.HasIndex("ShipPostalCode");
+            entity.HasIndex("ShippedDate");
+            entity.HasIndex("ShipVia");
+            entity.HasOne(e => e.Customer).WithMany(e => e.Orders).HasForeignKey("CustomerId");
+            entity.HasOne(e => e.Employee).WithMany(e => e.Orders).HasForeignKey("EmployeeId");
+            entity.HasOne(e => e.ShipViaNavigation).WithMany(e => e.Orders).HasForeignKey("ShipVia");
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity.HasKey(x => new { x.OrderId, x.ProductId });
+            entity.HasKey("_orderId", "_productId");
             entity.ToTable("Order Details");
-            entity.Property(e => e.OrderId).HasColumnName("OrderID");
-            entity.Property(e => e.ProductId).HasColumnName("ProductID");
+            entity.Property<int>("_orderId").HasColumnName("OrderID");
+            entity.Property<int>("_productId").HasColumnName("ProductID");
             entity.Property(e => e.Discount);
             entity.Property(e => e.Quantity).HasDefaultValueSql("((1))");
             entity.Property(e => e.UnitPrice).HasColumnType("money");
-            entity.HasIndex(x => x.OrderId);
-            entity.HasIndex(x => x.OrderId);
-            entity.HasIndex(x => x.ProductId);
-            entity.HasIndex(x => x.ProductId);
-            entity.HasOne(e => e.Order).WithMany(e => e.OrderDetails).HasForeignKey(x => x.OrderId);
-            entity.HasOne(e => e.Product).WithMany(e => e.OrderDetails).HasForeignKey(x => x.ProductId);
+            entity.HasIndex("_orderId");
+            entity.HasIndex("_orderId");
+            entity.HasIndex("_productId");
+            entity.HasIndex("_productId");
+            entity.HasOne(e => e.Order).WithMany(e => e.OrderDetails).HasForeignKey("_orderId");
+            entity.HasOne(e => e.Product).WithMany(e => e.OrderDetails).HasForeignKey("_productId");
         });
 
         modelBuilder.Entity<OrderDetailsExtended>(entity =>
@@ -299,7 +303,8 @@ public partial class NorthwindContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.Property(e => e.ProductId).HasColumnName("ProductID");
+            entity.HasKey("_productId");
+            entity.Property<int>("_productId").HasColumnName("ProductID");
             entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
             entity.Property(e => e.Discontinued);
             entity.Property(e => e.ProductName).HasMaxLength(40);
@@ -309,13 +314,13 @@ public partial class NorthwindContext : DbContext
             entity.Property(e => e.UnitPrice).HasColumnType("money").HasDefaultValueSql("((0))");
             entity.Property(e => e.UnitsInStock).HasDefaultValueSql("((0))");
             entity.Property(e => e.UnitsOnOrder).HasDefaultValueSql("((0))");
-            entity.HasIndex(x => x.CategoryId);
-            entity.HasIndex(x => x.CategoryId);
-            entity.HasIndex(x => x.ProductName);
-            entity.HasIndex(x => x.SupplierId);
-            entity.HasIndex(x => x.SupplierId);
-            entity.HasOne(e => e.Category).WithMany(e => e.Products).HasForeignKey(x => x.CategoryId);
-            entity.HasOne(e => e.Supplier).WithMany(e => e.Products).HasForeignKey(x => x.SupplierId);
+            entity.HasIndex("CategoryId");
+            entity.HasIndex("CategoryId");
+            entity.HasIndex("ProductName");
+            entity.HasIndex("SupplierId");
+            entity.HasIndex("SupplierId");
+            entity.HasOne(e => e.Category).WithMany(e => e.Products).HasForeignKey("CategoryId");
+            entity.HasOne(e => e.Supplier).WithMany(e => e.Products).HasForeignKey("SupplierId");
         });
 
         modelBuilder.Entity<ProductSalesFor1997>(entity =>
@@ -358,8 +363,9 @@ public partial class NorthwindContext : DbContext
 
         modelBuilder.Entity<Region>(entity =>
         {
+            entity.HasKey("_regionId");
             entity.ToTable("Region");
-            entity.Property(e => e.RegionId).HasColumnName("RegionID");
+            entity.Property<int>("_regionId").HasColumnName("RegionID");
             entity.Property(e => e.RegionDescription).HasMaxLength(50).IsFixedLength();
         });
 
@@ -385,7 +391,8 @@ public partial class NorthwindContext : DbContext
 
         modelBuilder.Entity<Shipper>(entity =>
         {
-            entity.Property(e => e.ShipperId).HasColumnName("ShipperID");
+            entity.HasKey("_shipperId");
+            entity.Property<int>("_shipperId").HasColumnName("ShipperID");
             entity.Property(e => e.CompanyName).HasMaxLength(40);
             entity.Property(e => e.Phone).HasMaxLength(24);
         });
@@ -410,7 +417,8 @@ public partial class NorthwindContext : DbContext
 
         modelBuilder.Entity<Supplier>(entity =>
         {
-            entity.Property(e => e.SupplierId).HasColumnName("SupplierID");
+            entity.HasKey("_supplierId");
+            entity.Property<int>("_supplierId").HasColumnName("SupplierID");
             entity.Property(e => e.Address).HasMaxLength(60);
             entity.Property(e => e.City).HasMaxLength(15);
             entity.Property(e => e.CompanyName).HasMaxLength(40);
@@ -422,16 +430,17 @@ public partial class NorthwindContext : DbContext
             entity.Property(e => e.Phone).HasMaxLength(24);
             entity.Property(e => e.PostalCode).HasMaxLength(10);
             entity.Property(e => e.Region).HasMaxLength(15);
-            entity.HasIndex(x => x.CompanyName);
-            entity.HasIndex(x => x.PostalCode);
+            entity.HasIndex("CompanyName");
+            entity.HasIndex("PostalCode");
         });
 
         modelBuilder.Entity<Territory>(entity =>
         {
-            entity.Property(e => e.TerritoryId).HasColumnName("TerritoryID").HasMaxLength(20);
+            entity.HasKey("_territoryId");
+            entity.Property<string>("_territoryId").HasColumnName("TerritoryID").HasMaxLength(20);
             entity.Property(e => e.RegionId).HasColumnName("RegionID");
             entity.Property(e => e.TerritoryDescription).HasMaxLength(50).IsFixedLength();
-            entity.HasOne(e => e.Region).WithMany(e => e.Territories).HasForeignKey(x => x.RegionId);
+            entity.HasOne(e => e.Region).WithMany(e => e.Territories).HasForeignKey("RegionId");
         });
 
     }

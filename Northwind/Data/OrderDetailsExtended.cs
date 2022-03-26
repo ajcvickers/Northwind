@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class OrderDetailsExtended
 {
+
     public OrderDetailsExtended(
         float discount, 
         int orderId, 

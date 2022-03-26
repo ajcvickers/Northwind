@@ -65,12 +65,21 @@ public partial class <#= Options.ContextName #> : DbContext
             entity.HasNoKey();
 <#
             }
-            else if (keyPropertyCount > 1
-                || key!.Properties[0].Name != entityType.Name + "Id")
+            else if (keyPropertyCount == 1)
             {
 #>
-            entity.HasKey(<#= code.Lambda(key.Properties) #>);
+            entity.HasKey("<#= ToField(key!.Properties[0].Name) #>");
 <#
+            }
+            else if (keyPropertyCount == 2)
+            {
+#>
+            entity.HasKey("<#= ToField(key!.Properties[0].Name) #>", "<#= ToField(key!.Properties[1].Name) #>");
+<#
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
         }
 
@@ -92,10 +101,18 @@ public partial class <#= Options.ContextName #> : DbContext
 
         foreach (var property in entityType.GetDeclaredProperties())
         {
+            if (property.IsPrimaryKey())
+            {
+#>
+            entity.Property<<#= code.Reference(property.ClrType) #>>("<#= ToField(property.Name) #>")<#
+            }
+            else
+            {
 #>
             entity.Property(e => e.<#= property.Name #>)<#
+            }
             var columnName = (string)property[RelationalAnnotationNames.ColumnName];
-            if (columnName != property.Name)
+            if (columnName != property.Name || property.IsPrimaryKey())
             {
 #>.HasColumnName("<#= columnName #>")<#
             }
@@ -124,8 +141,9 @@ public partial class <#= Options.ContextName #> : DbContext
 
         foreach (var index in entityType.GetIndexes())
         {
+            var indexProperty = index.Properties.Single();
 #>
-            entity.HasIndex(<#= code.Lambda(index.Properties) #>);
+            entity.HasIndex("<#= indexProperty.IsPrimaryKey() ? ToField(indexProperty.Name) : indexProperty.Name #>");
 <#
         }
 
@@ -141,7 +159,8 @@ public partial class <#= Options.ContextName #> : DbContext
             {
 #>.WithMany(e => e.<#= foreignKey.PrincipalToDependent!.Name #>)<#
             }
-#>.HasForeignKey(<#= code.Lambda(foreignKey.Properties) #>);
+            var fkProperty = foreignKey.Properties.Single();
+#>.HasForeignKey("<#= fkProperty.IsPrimaryKey() ? ToField(fkProperty.Name) : fkProperty.Name #>");
 <#
         }
 
@@ -193,4 +212,7 @@ public partial class <#= Options.ContextName #> : DbContext
 
         return false;
     }
+
+    static string ToField(string propertyName)
+      => "_" + propertyName.Substring(0, 1).ToLower() + propertyName.Substring(1);
 #>

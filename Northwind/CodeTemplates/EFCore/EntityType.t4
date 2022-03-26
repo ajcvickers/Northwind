@@ -23,10 +23,29 @@ namespace <#= NamespaceHint #>;
 
 public partial class <#= EntityType.Name #>
 {
+<#
+    var key = EntityType.FindPrimaryKey();
+    if (key != null)
+    {
+        foreach (var keyProperty in key.Properties)
+        {
+            var fieldName = "_" + keyProperty.Name.Substring(0, 1).ToLower() + keyProperty.Name.Substring(1);
+            if (!keyProperty.ClrType.IsValueType)
+            {
+                fieldName += " = null!";
+            }
+#>
+    private readonly <#= code.Reference(keyProperty.ClrType) #> <#= fieldName #>;
+<#
+
+        }
+    }
+#>
+
     public <#= EntityType.Name #>(<#
 
     var requiredProperties = EntityType.GetProperties()
-        .Where(p => !p.IsNullable)
+        .Where(p => !p.IsNullable && !p.IsPrimaryKey())
         .Select(p => new
         {
             p.Name,
@@ -54,7 +73,7 @@ public partial class <#= EntityType.Name #>
     }
 
 <#
-    foreach (var property in EntityType.GetProperties())
+    foreach (var property in EntityType.GetProperties().Where(p => !p.IsPrimaryKey()))
     {
         if (property.IsNullable)
         {

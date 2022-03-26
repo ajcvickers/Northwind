@@ -6,6 +6,7 @@ namespace Northwind.Data;
 
 public partial class OrdersQry
 {
+
     public OrdersQry(
         string companyName, 
         int orderId)
