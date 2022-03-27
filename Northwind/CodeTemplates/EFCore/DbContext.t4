@@ -51,7 +51,13 @@ public partial class <#= Options.ContextName #> : DbContext
     {
 <#
     foreach (var entityType in Model.GetEntityTypes().Where(e => !IsManyToManyJoinEntityType(e)))
-    {#>
+    {
+        var keyProperties = entityType.GetKeys().SelectMany(k => k.Properties)
+            .Concat(entityType.GetForeignKeys().SelectMany(k => k.Properties))
+            .Distinct()
+            .ToList();
+
+        #>
         modelBuilder.Entity<<#= entityType.Name #>>(entity =>
         {
 <#
@@ -101,7 +107,7 @@ public partial class <#= Options.ContextName #> : DbContext
 
         foreach (var property in entityType.GetDeclaredProperties())
         {
-            if (property.IsPrimaryKey())
+            if (keyProperties.Contains(property))
             {
 #>
             entity.Property<<#= code.Reference(property.ClrType) #>>("<#= ToField(property.Name) #>")<#
@@ -112,7 +118,7 @@ public partial class <#= Options.ContextName #> : DbContext
             entity.Property(e => e.<#= property.Name #>)<#
             }
             var columnName = (string)property[RelationalAnnotationNames.ColumnName];
-            if (columnName != property.Name || property.IsPrimaryKey())
+            if (columnName != property.Name || keyProperties.Contains(property))
             {
 #>.HasColumnName("<#= columnName #>")<#
             }
@@ -143,7 +149,7 @@ public partial class <#= Options.ContextName #> : DbContext
         {
             var indexProperty = index.Properties.Single();
 #>
-            entity.HasIndex("<#= indexProperty.IsPrimaryKey() ? ToField(indexProperty.Name) : indexProperty.Name #>");
+            entity.HasIndex("<#= keyProperties.Contains(indexProperty) ? ToField(indexProperty.Name) : indexProperty.Name #>");
 <#
         }
 
@@ -160,7 +166,7 @@ public partial class <#= Options.ContextName #> : DbContext
 #>.WithMany(e => e.<#= foreignKey.PrincipalToDependent!.Name #>)<#
             }
             var fkProperty = foreignKey.Properties.Single();
-#>.HasForeignKey("<#= fkProperty.IsPrimaryKey() ? ToField(fkProperty.Name) : fkProperty.Name #>");
+#>.HasForeignKey("<#= ToField(fkProperty.Name) #>");
 <#
         }
 

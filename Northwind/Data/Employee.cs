@@ -7,6 +7,7 @@ namespace Northwind.Data;
 public partial class Employee
 {
     private readonly int _employeeId;
+    private readonly int? _reportsTo;
 
     public Employee(
         string firstName, 
@@ -30,7 +31,6 @@ public partial class Employee
     public string? PhotoPath { get; set; }
     public string? PostalCode { get; set; }
     public string? Region { get; set; }
-    public int? ReportsTo { get; set; }
     public string? Title { get; set; }
     public string? TitleOfCourtesy { get; set; }
     public ICollection<Employee> InverseReportsToNavigation { get; } = new List<Employee>();

@@ -7,13 +7,14 @@ namespace Northwind.Data;
 public partial class Order
 {
     private readonly int _orderId;
+    private readonly string _customerId = null!;
+    private readonly int? _employeeId;
+    private readonly int? _shipVia;
 
     public Order()
     {
     }
 
-    public string? CustomerId { get; set; }
-    public int? EmployeeId { get; set; }
     public decimal? Freight { get; set; }
     public DateTime? OrderDate { get; set; }
     public DateTime? RequiredDate { get; set; }
@@ -23,7 +24,6 @@ public partial class Order
     public string? ShipName { get; set; }
     public string? ShipPostalCode { get; set; }
     public string? ShipRegion { get; set; }
-    public int? ShipVia { get; set; }
     public DateTime? ShippedDate { get; set; }
     public Customer? Customer { get; set; }
     public Employee? Employee { get; set; }

@@ -7,6 +7,8 @@ namespace Northwind.Data;
 public partial class Product
 {
     private readonly int _productId;
+    private readonly int? _categoryId;
+    private readonly int? _supplierId;
 
     public Product(
         bool discontinued, 
@@ -16,12 +18,10 @@ public partial class Product
         ProductName = productName;
     }
 
-    public int? CategoryId { get; set; }
     public bool Discontinued { get; }
     public string ProductName { get; }
     public string? QuantityPerUnit { get; set; }
     public short? ReorderLevel { get; set; }
-    public int? SupplierId { get; set; }
     public decimal? UnitPrice { get; set; }
     public short? UnitsInStock { get; set; }
     public short? UnitsOnOrder { get; set; }

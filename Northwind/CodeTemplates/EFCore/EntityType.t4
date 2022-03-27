@@ -24,28 +24,29 @@ namespace <#= NamespaceHint #>;
 public partial class <#= EntityType.Name #>
 {
 <#
-    var key = EntityType.FindPrimaryKey();
-    if (key != null)
+    var keyProperties = EntityType.GetKeys().SelectMany(k => k.Properties)
+        .Concat(EntityType.GetForeignKeys().SelectMany(k => k.Properties))
+        .Distinct()
+        .ToList();
+
+    foreach (var keyProperty in keyProperties)
     {
-        foreach (var keyProperty in key.Properties)
+        var fieldName = "_" + keyProperty.Name.Substring(0, 1).ToLower() + keyProperty.Name.Substring(1);
+        if (!keyProperty.ClrType.IsValueType)
         {
-            var fieldName = "_" + keyProperty.Name.Substring(0, 1).ToLower() + keyProperty.Name.Substring(1);
-            if (!keyProperty.ClrType.IsValueType)
-            {
-                fieldName += " = null!";
-            }
+            fieldName += " = null!";
+        }
 #>
     private readonly <#= code.Reference(keyProperty.ClrType) #> <#= fieldName #>;
 <#
 
-        }
     }
 #>
 
     public <#= EntityType.Name #>(<#
 
     var requiredProperties = EntityType.GetProperties()
-        .Where(p => !p.IsNullable && !p.IsPrimaryKey())
+        .Where(p => !p.IsNullable && !keyProperties.Contains(p))
         .Select(p => new
         {
             p.Name,
@@ -73,7 +74,7 @@ public partial class <#= EntityType.Name #>
     }
 
 <#
-    foreach (var property in EntityType.GetProperties().Where(p => !p.IsPrimaryKey()))
+    foreach (var property in EntityType.GetProperties().Where(p => !keyProperties.Contains(p)))
     {
         if (property.IsNullable)
         {
